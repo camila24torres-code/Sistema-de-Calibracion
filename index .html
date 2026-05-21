@@ -5,31 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Banco de Pruebas y Monitoreo en Tuberías</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Montserrat:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-base:       #0d1117;
-      --bg-surface:    #161b22;
-      --bg-card:       #1c2230;
-      --bg-card-hover: #222a3a;
-      --border:        #2a3547;
-      --border-light:  #334057;
-      --accent:        #1e88e5;
-      --accent-glow:   rgba(30,136,229,0.15);
-      --accent2:       #00b4d8;
-      --success:       #00c896;
-      --warning:       #f0a500;
-      --danger:        #e55353;
-      --text-primary:  #e6edf3;
-      --text-secondary:#8b949e;
-      --text-muted:    #586069;
-      --sidebar-w:     300px;
-      --header-h:      72px;
-      --font:          'Inter', sans-serif;
-      --mono:          'JetBrains Mono', monospace;
-    }
 
+  /* ===== PALETA INSTITUCIONAL ===== */
+
+  --bg-base:        #DADADA;
+  --bg-surface:     #f4f4f4;
+  --bg-card:        #ffffff;
+  --bg-card-hover:  #f0f0f0;
+
+  --border:         #c2c2c2;
+  --border-light:   #b0b0b0;
+
+  --accent:         #ad3333;
+  --accent-glow:    rgba(173, 51, 51, 0.12);
+
+  --accent2:        #8f2a2a;
+
+  --success:        #2e7d32;
+  --warning:        #d48b00;
+  --danger:         #c62828;
+
+  --text-primary:   #2f2f2f;
+  --text-secondary: #5e5e5e;
+  --text-muted:     #7d7d7d;
+
+  --sidebar-w:      300px;
+  --header-h:       72px;
+
+  --font:           'Montserrat', sans-serif;
+  --title-font:     'Cinzel', serif;
+  --mono:           'JetBrains Mono', monospace;
+}
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -92,15 +101,18 @@
       flex: 1;
     }
     .header-title h1 {
-      font-size: 17px;
-      font-weight: 600;
-      color: var(--text-primary);
-      letter-spacing: -0.3px;
+  font-size: 24px;
+  font-family: var(--title-font);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-transform: uppercase;
     }
     .header-title p {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 1px;
+  font-size: 13px;
+  color: #555;
+  margin-top: 4px;
+  font-weight: 500;
     }
 
     .header-status {
@@ -312,10 +324,12 @@
       align-items: center;
       justify-content: space-between;
     }
-    .chart-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-primary);
+   .chart-title {
+  font-size: 16px;
+  font-family: var(--title-font);
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.5px;
     }
     .chart-subtitle {
       font-size: 12px;
