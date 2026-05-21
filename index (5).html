@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banco de Pruebas y Monitoreo en Tuberías</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <style>
+    :root {
+      --bg-base:       #0d1117;
+      --bg-surface:    #161b22;
+      --bg-card:       #1c2230;
+      --bg-card-hover: #222a3a;
+      --border:        #2a3547;
+      --border-light:  #334057;
+      --accent:        #1e88e5;
+      --accent-glow:   rgba(30,136,229,0.15);
+      --accent2:       #00b4d8;
+      --success:       #00c896;
+      --warning:       #f0a500;
+      --danger:        #e55353;
+      --text-primary:  #e6edf3;
+      --text-secondary:#8b949e;
+      --text-muted:    #586069;
+      --sidebar-w:     300px;
+      --header-h:      72px;
+      --font:          'Inter', sans-serif;
+      --mono:          'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg-base);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ──────────── HEADER ──────────── */
+    header {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: var(--header-h);
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      z-index: 1000;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.4);
+    }
+
+    .header-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 2px solid var(--border-light);
+    }
+
+    .header-logo img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    /* SVG fallback logo — shown when img fails */
+    .logo-fallback {
+      display: none;
+      width: 40px; height: 40px;
+    }
+    .header-logo img:not([src]), .header-logo img[src=""], .header-logo img.broken {
+      display: none;
+    }
+    .header-logo img.broken + .logo-fallback {
+      display: block;
+    }
+
+    .header-title {
+      flex: 1;
+    }
+    .header-title h1 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+    }
+    .header-title p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+
+    .header-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--success);
+      font-weight: 500;
+    }
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0,200,150,0.5); }
+      50%       { box-shadow: 0 0 0 5px rgba(0,200,150,0); }
+    }
+
+    /* ──────────── LAYOUT ──────────── */
+    .layout {
+      display: flex;
+      margin-top: var(--header-h);
+      min-height: calc(100vh - var(--header-h));
+    }
+
+    /* ──────────── SIDEBAR ──────────── */
+    .sidebar {
+      position: fixed;
+      top: var(--header-h);
+      left: 0;
+      width: var(--sidebar-w);
+      bottom: 0;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sidebar-section {
+      margin-bottom: 4px;
+    }
+
+    .sidebar-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    /* ── sensor cards ── */
+    .sensor-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sensor-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .sensor-card:hover {
+      border-color: var(--border-light);
+      background: var(--bg-card-hover);
+    }
+    .sensor-card-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sensor-dot {
+      width: 9px; height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sensor-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .sensor-value {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .sensor-unit {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-left: 2px;
+    }
+
+    /* sensor dot colors */
+    .dot-0 { background: #1e88e5; }
+    .dot-1 { background: #00b4d8; }
+    .dot-2 { background: #00c896; }
+    .dot-3 { background: #f0a500; }
+    .dot-4 { background: #9b59b6; }
+
+    /* ── flow boxes ── */
+    .flow-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .flow-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .flow-value {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--accent2);
+    }
+    .flow-unit {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .flow-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 0;
+    }
+
+    /* ── buttons ── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: #1565c0;
+      border-color: #1565c0;
+      color: #fff;
+    }
+    .btn svg {
+      width: 16px; height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ──────────── MAIN CONTENT ──────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      padding: 24px;
+      width: calc(100% - var(--sidebar-w));
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── chart containers ── */
+    .chart-wrap {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .chart-header {
+      padding: 16px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .chart-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .chart-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .chart-badge {
+      background: var(--accent-glow);
+      border: 1px solid rgba(30,136,229,0.3);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.03em;
+    }
+
+    /* ──────────── FOOTER ──────────── */
+    footer {
+      margin-left: var(--sidebar-w);
+      text-align: center;
+      color: var(--text-muted);
+      padding: 20px;
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+      line-height: 1.8;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ──────────── SCROLLBAR ──────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header>
+  <div class="header-logo">
+    <!--
+      IMPORTANTE: Coloca el archivo "unipamplona_64.png" en la misma
+      carpeta que este index.html para que el logo aparezca.
+      En GitHub Pages, el archivo debe estar en el repositorio.
+    -->
+    <img
+      src="unipamplona_64.png"
+      alt="Logo Universidad de Pamplona"
+      onerror="this.classList.add('broken')"
+    />
+    <!-- Fallback SVG si la imagen no carga -->
+    <svg class="logo-fallback" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="20" cy="20" rx="18" ry="18" fill="#ad3333" stroke="#333" stroke-width="1.5"/>
+      <text x="20" y="25" text-anchor="middle" font-size="14" font-weight="700" fill="#fff" font-family="serif">UP</text>
+    </svg>
+  </div>
+  <div class="header-title">
+    <h1>Banco de Pruebas y Monitoreo en Tuberías</h1>
+    <p>Programa de Ingeniería Civil · Universidad de Pamplona</p>
+  </div>
+  <div class="header-status">
+    <div class="status-dot"></div>
+    En línea
+  </div>
+</header>
+
+<!-- ═══════════════════ LAYOUT ═══════════════════ -->
+<div class="layout">
+
+  <!-- ═══════ SIDEBAR ═══════ -->
+  <aside class="sidebar">
+
+    <!-- Lecturas de presión -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Presión en tiempo real</div>
+      <div class="sensor-grid" id="pressureReadings"></div>
+    </div>
+
+    <!-- Caudales -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Caudal</div>
+      <div class="flow-card">
+        <div class="flow-label">FS300A</div>
+        <div>
+          <span class="flow-value" id="flowFSVal">0.00</span>
+          <span class="flow-unit">L/h</span>
+        </div>
+        <div class="flow-divider"></div>
+        <div class="flow-label">YF-S201</div>
+        <div>
+          <span class="flow-value" id="flowYFVal">0.00</span>
+          <span class="flow-unit">L/min</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">Acciones</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button class="btn btn-primary" onclick="downloadCSV()">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar CSV
+        </button>
+        <button class="btn" onclick="calibrateSensors()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          Calibrar Sensores
+        </button>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ═══════ MAIN ═══════ -->
+  <div class="main">
+
+    <!-- Chart 1: Presiones -->
+    <div class="chart-wrap">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Presiones de los sensores</div>
+          <div class="chart-subtitle">Últimas 20 lecturas — actualiza cada 2 s</div>
+        </div>
+        <div class="chart-badge">PSI</div>
+      </div>
+      <div id="pressureChart" style="height:280px;"></div>
+    </div>
+
+    <!-- Chart 2: FS300A -->
+    <div class="chart-wrap">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Caudal — Sensor FS300A</div>
+          <div class="chart-subtitle">Medición de flujo volumétrico</div>
+        </div>
+        <div class="chart-badge">L/h</div>
+      </div>
+      <div id="flowFSChart" style="height:220px;"></div>
+    </div>
+
+    <!-- Chart 3: YF-S201 -->
+    <div class="chart-wrap">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Caudal — Sensor YF-S201</div>
+          <div class="chart-subtitle">Medición de flujo volumétrico</div>
+        </div>
+        <div class="chart-badge">L/min</div>
+      </div>
+      <div id="flowYFChart" style="height:220px;"></div>
+    </div>
+
+    <footer>
+      Programa de Ingeniería Civil &mdash; Facultad de Arquitectura e Ingeniería<br>
+      Universidad de Pamplona &mdash;
+      <a href="mailto:contacto@unipamplona.edu.co">contacto@unipamplona.edu.co</a>
+    </footer>
+
+  </div>
+</div>
+
+<script>
+  /* ═══════════ BUILD SENSOR CARDS ═══════════ */
+  const SENSOR_COLORS = ['#1e88e5','#00b4d8','#00c896','#f0a500','#9b59b6'];
+  const pressureDiv = document.getElementById('pressureReadings');
+
+  for (let i = 0; i < 5; i++) {
+    const card = document.createElement('div');
+    card.className = 'sensor-card';
+    card.innerHTML = `
+      <div class="sensor-card-left">
+        <div class="sensor-dot dot-${i}"></div>
+        <span class="sensor-name">Sensor ${i + 1}</span>
+      </div>
+      <div>
+        <span class="sensor-value" id="val${i}">0.00</span>
+        <span class="sensor-unit">psi</span>
+      </div>`;
+    pressureDiv.appendChild(card);
+  }
+
+  /* ═══════════ HIGHCHARTS THEME ═══════════ */
+  Highcharts.setOptions({
+    chart: {
+      backgroundColor: 'transparent',
+      style: { fontFamily: "'Inter', sans-serif" },
+      animation: { duration: 600, easing: 'easeOutQuad' },
+      marginTop: 20,
+    },
+    title:    { text: null },
+    credits:  { enabled: false },
+    legend: {
+      itemStyle: { color: '#8b949e', fontSize: '12px', fontWeight: '500' },
+      itemHoverStyle: { color: '#e6edf3' },
+    },
+    tooltip: {
+      backgroundColor: '#1c2230',
+      borderColor: '#2a3547',
+      borderRadius: 8,
+      style: { color: '#e6edf3', fontSize: '12px' },
+      shared: true,
+      crosshairs: true,
+    },
+    xAxis: {
+      type: 'datetime',
+      lineColor: '#2a3547',
+      tickColor: '#2a3547',
+      labels: { style: { color: '#586069', fontSize: '11px' }, format: '{value:%H:%M:%S}' },
+      gridLineColor: 'transparent',
+    },
+    yAxis: {
+      gridLineColor: 'rgba(42,53,71,0.6)',
+      lineColor: 'transparent',
+      tickColor: 'transparent',
+      title: { style: { color: '#586069', fontSize: '11px' } },
+      labels: { style: { color: '#586069', fontSize: '11px' } },
+    },
+    plotOptions: {
+      series: {
+        animation: false,
+        marker: { enabled: false, states: { hover: { enabled: true, radius: 4 } } },
+        lineWidth: 2,
+        states: { hover: { lineWidth: 3 } },
+      },
+      spline: {
+        softThreshold: false,
+      },
+    },
+  });
+
+  /* ═══════════ CREATE CHARTS ═══════════ */
+  const pressureChart = Highcharts.chart('pressureChart', {
+    chart: { type: 'spline' },
+    yAxis: { title: { text: 'Presión (psi)' } },
+    series: Array.from({ length: 5 }, (_, i) => ({
+      name: `Sensor ${i + 1}`,
+      data: [],
+      color: SENSOR_COLORS[i],
+    })),
+  });
+
+  const flowFSChart = Highcharts.chart('flowFSChart', {
+    chart: { type: 'area' },
+    yAxis: { title: { text: 'Flujo (L/h)' } },
+    series: [{
+      name: 'FS300A',
+      data: [],
+      color: '#00b4d8',
+      fillColor: { linearGradient: { x1:0, y1:0, x2:0, y2:1 },
+        stops: [[0,'rgba(0,180,216,0.25)'], [1,'rgba(0,180,216,0)']] },
+    }],
+  });
+
+  const flowYFChart = Highcharts.chart('flowYFChart', {
+    chart: { type: 'area' },
+    yAxis: { title: { text: 'Flujo (L/min)' } },
+    series: [{
+      name: 'YF-S201',
+      data: [],
+      color: '#00c896',
+      fillColor: { linearGradient: { x1:0, y1:0, x2:0, y2:1 },
+        stops: [[0,'rgba(0,200,150,0.25)'], [1,'rgba(0,200,150,0)']] },
+    }],
+  });
+
+  /* ═══════════ DATA FETCHING ═══════════ */
+  const MAX_POINTS = 20;
+
+  async function fetchData() {
+    try {
+      const res  = await fetch('/pressure');
+      const data = await res.json();
+      const t    = Date.now();
+
+      for (let i = 0; i < 5; i++) {
+        const val = data['p' + (i + 1)];
+        document.getElementById('val' + i).textContent = val.toFixed(2);
+        pressureChart.series[i].addPoint([t, val], true,
+          pressureChart.series[i].data.length >= MAX_POINTS);
+      }
+
+      document.getElementById('flowFSVal').textContent = data.flowFS.toFixed(2);
+      document.getElementById('flowYFVal').textContent = data.flowYF.toFixed(2);
+
+      flowFSChart.series[0].addPoint([t, data.flowFS], true,
+        flowFSChart.series[0].data.length >= MAX_POINTS);
+      flowYFChart.series[0].addPoint([t, data.flowYF], true,
+        flowYFChart.series[0].data.length >= MAX_POINTS);
+    } catch (e) {
+      /* Silently ignore fetch errors — ESP8266 may be offline */
+    }
+  }
+
+  async function downloadCSV() {
+    const res = await fetch('/data');
+    const csv = await res.text();
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'datos_monitoreo_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+  }
+
+  function calibrateSensors() {
+    fetch('/calibrate')
+      .then(r => r.text())
+      .then(() => alert('✔ Calibración completada'));
+  }
+
+  setInterval(fetchData, 2000);
+</script>
+</body>
+</html>
